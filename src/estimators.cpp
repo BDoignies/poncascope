@@ -29,7 +29,7 @@ void estimateDifferentialQuantities(const std::string& name, Context& context) {
             dmin.row( i ) = fit.kminDirection();
             dmax.row( i ) = fit.kmaxDirection();
             normal.row(i) = fit.primitiveGradient();
-            proj.row(i)   = fit.getNeighborFilter().frame().center() - context.asset.tree.points()[i].pos();
+            proj.row(i)   = fit.getNeighborFrame().center() - context.asset.tree.points()[i].pos();
         }, context);
     });
 
@@ -103,7 +103,7 @@ void callback_estimators(Context& context)
     ImGui::SameLine();
     ImGui::InputFloat("Epsilon", &context.computeOpts.mlsEpsilon);
 
-    auto filter = Context::Types::Factory::Filter<NotDerivativesProvider, PrincipalCurvaturesProvider>();
+    auto filter = Context::Types::Factory::Filter<ImplicitPrimitiveProvider, PrincipalCurvaturesProvider>();
     filter.foreach([&](auto& x) {
         using FitType = std::remove_cv_t<decltype(x.object)>;
 
@@ -111,4 +111,7 @@ void callback_estimators(Context& context)
             estimateDifferentialQuantities<FitType>(x.name, context);
         ImGui::SameLine();
     });
+    
+    // Otherwise the subtree name overlapps the buttons. 
+    ImGui::NewLine();
 }
